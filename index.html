@@ -17,9 +17,23 @@ var volume = parseInt(params.get("volume"), 10);
 if (isNaN(volume)) volume = 50;
 volume = Math.min(100, Math.max(0, volume));
 var player;
+var reported = false;
 
 function send(name, a, b) {
 	if (window.radio && radio[name]) radio[name](a, b);
+}
+
+// A hidden player does not always fire the playing state change, the
+// moving playback time is the reliable sign.
+function watchPlayback() {
+	setInterval(function() {
+		if (reported || !player.getCurrentTime) return;
+		var time = player.getCurrentTime();
+		if (time <= 0) return;
+		reported = true;
+		send("OnState", "time " + time, player.isMuted());
+		send("OnPlaying");
+	}, 1000);
 }
 
 function setVolume(i) {
@@ -43,6 +57,7 @@ function onYouTubeIframeAPIReady() {
 				e.target.unMute();
 				e.target.setVolume(volume);
 				e.target.playVideo();
+				watchPlayback();
 			},
 			onStateChange: function(e) {
 				send("OnState", e.data, e.target.isMuted());
