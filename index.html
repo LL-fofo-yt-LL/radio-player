@@ -73,6 +73,7 @@ function onYouTubeIframeAPIReady() {
 			onStateChange: function(e) {
 				if (e.data === 1) e.target.unMute();
 				if (e.data === 1) send("OnPlaying");
+				if (e.data === 2) send("OnPaused");
 				if (e.data === 0) send("OnEnded");
 			},
 			onError: function(e) { send("OnError", e.data); }
