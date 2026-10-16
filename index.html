@@ -31,7 +31,6 @@ function watchPlayback() {
 		var time = player.getCurrentTime();
 		if (time <= 0) return;
 		reported = true;
-		send("OnState", "time " + time, player.isMuted());
 		send("OnPlaying");
 	}, 1000);
 }
@@ -41,7 +40,6 @@ function setVolume(i) {
 }
 
 function onYouTubeIframeAPIReady() {
-	send("OnState", "api", false);
 	if (!/^[\w-]{11}$/.test(videoId)) {
 		send("OnError", 2);
 		return;
@@ -53,14 +51,12 @@ function onYouTubeIframeAPIReady() {
 		playerVars: { autoplay: 1, controls: 0, playsinline: 1 },
 		events: {
 			onReady: function(e) {
-				send("OnState", "ready", e.target.isMuted());
 				e.target.unMute();
 				e.target.setVolume(volume);
 				e.target.playVideo();
 				watchPlayback();
 			},
 			onStateChange: function(e) {
-				send("OnState", e.data, e.target.isMuted());
 				if (e.data === 1) e.target.unMute();
 				if (e.data === 1) send("OnPlaying");
 				if (e.data === 0) send("OnEnded");
