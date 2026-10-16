@@ -23,13 +23,15 @@ function send(name, a, b) {
 	if (window.radio && radio[name]) radio[name](a, b);
 }
 
-// A hidden player does not always fire the playing state change, the
-// moving playback time is the reliable sign.
+// Reports the playback time every second. A hidden player does not
+// always fire the playing state change, the moving time is the
+// reliable sign.
 function watchPlayback() {
 	setInterval(function() {
-		if (reported || !player.getCurrentTime) return;
+		if (!player.getCurrentTime) return;
 		var time = player.getCurrentTime();
-		if (time <= 0) return;
+		send("OnTime", time, player.getDuration());
+		if (reported || time <= 0) return;
 		reported = true;
 		send("OnPlaying");
 	}, 1000);
@@ -37,6 +39,18 @@ function watchPlayback() {
 
 function setVolume(i) {
 	if (player && player.setVolume) player.setVolume(i);
+}
+
+function seekTo(time) {
+	if (player && player.seekTo) player.seekTo(time, true);
+}
+
+function pauseVideo() {
+	if (player && player.pauseVideo) player.pauseVideo();
+}
+
+function playVideo() {
+	if (player && player.playVideo) player.playVideo();
 }
 
 function onYouTubeIframeAPIReady() {
